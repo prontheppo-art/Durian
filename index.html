@@ -30,14 +30,14 @@
         </div>
     </header>
 
-    <!-- Main Map Area -->
-    <main class="flex-1 relative w-full h-full overflow-hidden flex items-center justify-center bg-slate-950 p-1">
-        <div class="relative w-full h-full bg-emerald-950/40 border border-emerald-600/50 rounded-xl flex items-center justify-center overflow-hidden">
-            <div class="grid grid-cols-6 gap-2.5 sm:gap-3 relative scale-[1.9] sm:scale-[2.3] origin-center" id="treeGrid"></div>
+    <!-- Main Map Area (ปรับให้เลื่อนดูได้และไม่ล้นหน้าจอ) -->
+    <main class="flex-1 relative w-full h-full overflow-auto flex items-center justify-center bg-slate-950 p-2">
+        <div class="relative bg-emerald-950/40 border border-emerald-600/50 rounded-xl flex items-center justify-center p-2.5 shadow-inner">
+            <div class="grid grid-cols-6 gap-2 relative origin-center" id="treeGrid"></div>
         </div>
     </main>
 
-    <!-- Modal 1: เลือกรูปภาพ & ถ่ายรูป (ปรับแต่งตัวอักษรและปุ่มให้ใหญ่ชัดเจนขึ้น) -->
+    <!-- Modal 1: เลือกรูปภาพ & ถ่ายรูป -->
     <div id="photoModal" onclick="closeModalOnOutside(event, 'photoModal')" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end justify-center z-40 hidden">
         <div class="bg-white text-slate-800 w-full max-w-lg rounded-t-3xl p-5 sm:p-6 shadow-2xl max-h-[85vh] flex flex-col">
             <div class="flex justify-between items-center border-b border-slate-200 pb-3 mb-3">
@@ -45,7 +45,6 @@
                 <button onclick="closeModal('photoModal')" class="text-slate-400 hover:text-slate-600 text-3xl font-bold px-2">&times;</button>
             </div>
             
-            <!-- ส่วนปุ่มถ่ายรูปและตัวกรองปี ขยายปุ่มและตัวหนังสือให้ชัดเจน -->
             <div class="flex justify-between items-center mb-4 gap-2">
                 <div id="yearTabs" class="flex gap-2 overflow-x-auto pb-1 flex-1 text-sm sm:text-base font-bold"></div>
                 
@@ -150,16 +149,16 @@
                     const treeId = `${row}${col}`;
                     
                     const cellWrapper = document.createElement('div');
-                    cellWrapper.className = 'relative w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center';
+                    cellWrapper.className = 'relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center';
                     cellWrapper.id = `cell-${treeId}`;
 
                     const btn = document.createElement('button');
-                    btn.className = 'w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-amber-950/90 hover:bg-emerald-600 border border-amber-700/60 flex items-center justify-center text-white font-black text-xs sm:text-sm shadow-md active:scale-95';
+                    btn.className = 'w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-amber-950/90 hover:bg-emerald-600 border border-amber-700/60 flex items-center justify-center text-white font-black text-xs shadow-md active:scale-95';
                     btn.innerText = treeId;
                     btn.onclick = () => openTreePhotos(treeId);
 
                     if (treeId === 'M1') {
-                        btn.className = 'w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-amber-600 hover:bg-amber-500 border border-amber-400 flex items-center justify-center text-xs sm:text-sm shadow-lg active:scale-95';
+                        btn.className = 'w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-600 hover:bg-amber-500 border border-amber-400 flex items-center justify-center text-xs shadow-lg active:scale-95';
                         btn.innerHTML = '🏠';
                         btn.title = 'บ้าน (M1)';
                     }
@@ -172,7 +171,7 @@
             const cellL6 = document.getElementById('cell-L6');
             if (cellL6) {
                 const houseContainer = document.createElement('div');
-                houseContainer.className = 'absolute top-0 left-0 w-[94px] h-11 pointer-events-auto';
+                houseContainer.className = 'absolute top-0 left-0 w-[78px] h-9 pointer-events-auto';
                 houseContainer.innerHTML = horizontalHouseOverlay;
                 cellL6.appendChild(houseContainer);
             }
@@ -180,7 +179,7 @@
             const cellD6 = document.getElementById('cell-D6');
             if (cellD6) {
                 const roofContainer = document.createElement('div');
-                roofContainer.className = 'absolute top-0 left-0 w-11 h-[94px] pointer-events-auto';
+                roofContainer.className = 'absolute top-0 left-0 w-9 h-[78px] pointer-events-auto';
                 roofContainer.innerHTML = verticalHipRoofOverlay;
                 cellD6.appendChild(roofContainer);
             }
@@ -455,4 +454,4 @@
         document.addEventListener('DOMContentLoaded', initData);
     </script>
 </body>
-</html> 
+</html>
