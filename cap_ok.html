@@ -21,37 +21,36 @@
 <body class="bg-slate-900 text-white h-[100dvh] w-screen flex flex-col select-none overflow-hidden">
 
     <!-- Header (ตัวนับยอดผู้เข้าชมที่มุมขวาบน) -->
-    <header class="bg-slate-800 border-b border-slate-700 py-2.5 px-4 flex justify-between items-center z-20 shadow-md shrink-0">
-        <h1 class="text-base sm:text-lg font-bold">Panoramic Minor Garden</h1>
+    <header class="bg-slate-800 border-b border-slate-700 py-2 px-4 flex justify-between items-center z-20 shadow-md shrink-0">
+        <h1 class="text-sm sm:text-base font-bold">Panoramic Minor Garden</h1>
         
-        <div class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-700/80 px-2.5 py-1 rounded-full text-xs font-mono text-emerald-400 shadow-inner">
-            <span class="text-sm">👁️</span>
+        <div class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-700/80 px-2 py-0.5 rounded-full text-xs font-mono text-emerald-400 shadow-inner">
+            <span class="text-xs">👁️</span>
             <span id="visitorCount">...</span>
         </div>
     </header>
 
-    <!-- Main Map Area -->
+    <!-- Main Map Area (ขนาดพอดีหน้าจอตามรูปที่ 1) -->
     <main class="flex-1 relative w-full h-full overflow-hidden flex items-center justify-center bg-slate-950 p-1">
         <div class="relative w-full h-full bg-emerald-950/40 border border-emerald-600/50 rounded-xl flex items-center justify-center overflow-hidden">
-            <div class="grid grid-cols-6 gap-2.5 sm:gap-3 relative scale-[1.9] sm:scale-[2.3] origin-center" id="treeGrid"></div>
+            <div class="grid grid-cols-6 gap-1.5 sm:gap-2 relative scale-[0.95] sm:scale-100 origin-center" id="treeGrid"></div>
         </div>
     </main>
 
-    <!-- Modal 1: เลือกรูปภาพ & ถ่ายรูป (ปรับแต่งตัวอักษรและปุ่มให้ใหญ่ชัดเจนขึ้น) -->
+    <!-- Modal 1: เลือกรูปภาพ & ถ่ายรูป -->
     <div id="photoModal" onclick="closeModalOnOutside(event, 'photoModal')" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end justify-center z-40 hidden">
-        <div class="bg-white text-slate-800 w-full max-w-lg rounded-t-3xl p-5 sm:p-6 shadow-2xl max-h-[85vh] flex flex-col">
+        <div class="bg-white text-slate-800 w-full max-w-lg rounded-t-3xl p-4 sm:p-6 shadow-2xl max-h-[85vh] flex flex-col">
             <div class="flex justify-between items-center border-b border-slate-200 pb-3 mb-3">
-                <h3 id="modalTitle" class="text-xl sm:text-2xl font-black text-slate-800 tracking-wide">สวนทุเรียนของฉัน</h3>
+                <h3 id="modalTitle" class="text-lg sm:text-xl font-black text-slate-800 tracking-wide">สวนทุเรียนของฉัน</h3>
                 <button onclick="closeModal('photoModal')" class="text-slate-400 hover:text-slate-600 text-3xl font-bold px-2">&times;</button>
             </div>
             
-            <!-- ส่วนปุ่มถ่ายรูปและตัวกรองปี ขยายปุ่มและตัวหนังสือให้ชัดเจน -->
             <div class="flex justify-between items-center mb-4 gap-2">
-                <div id="yearTabs" class="flex gap-2 overflow-x-auto pb-1 flex-1 text-sm sm:text-base font-bold"></div>
+                <div id="yearTabs" class="flex gap-2 overflow-x-auto pb-1 flex-1 text-sm font-bold"></div>
                 
                 <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(event)">
-                <button onclick="triggerCamera()" id="uploadBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 sm:py-2.5 rounded-xl text-sm sm:text-base font-extrabold flex items-center gap-1.5 shadow-md shrink-0 active:scale-95 transition">
-                    <span class="text-lg">📷</span> ถ่ายรูปต้นนี้
+                <button onclick="triggerCamera()" id="uploadBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1 shadow-md shrink-0 active:scale-95 transition">
+                    <span>📷</span> ถ่ายรูปต้นนี้
                 </button>
             </div>
 
@@ -62,16 +61,16 @@
     <!-- Modal 2: Lightbox สไลด์รูปขนาดใหญ่ -->
     <div id="lightboxModal" onclick="closeModalOnOutside(event, 'lightboxModal')" class="fixed inset-0 bg-black z-50 hidden flex flex-col justify-between">
         <div class="w-full flex justify-between items-center text-white z-20 p-4 bg-gradient-to-b from-black/80 to-transparent">
-            <span id="lightboxTitle" class="text-base sm:text-lg font-mono font-bold"></span>
+            <span id="lightboxTitle" class="text-sm sm:text-base font-mono font-bold"></span>
             <button onclick="closeModal('lightboxModal')" class="text-3xl text-white hover:text-gray-300 p-2">&times;</button>
         </div>
 
         <div class="relative w-full flex-1 flex items-center justify-center overflow-hidden" id="swipeArea">
-            <button onclick="prevImage()" class="absolute left-3 bg-black/60 text-white p-3 rounded-full hover:bg-black/90 z-20 text-xl shadow-lg">❮</button>
+            <button onclick="prevImage()" class="absolute left-3 bg-black/60 text-white p-2.5 rounded-full hover:bg-black/90 z-20 text-lg shadow-lg">❮</button>
             
             <img id="lightboxImg" src="" class="w-full h-full object-contain transition-transform duration-75 origin-center select-none" style="touch-action: none; will-change: transform;">
             
-            <button onclick="nextImage()" class="absolute right-3 bg-black/60 text-white p-3 rounded-full hover:bg-black/90 z-20 text-xl shadow-lg">❯</button>
+            <button onclick="nextImage()" class="absolute right-3 bg-black/60 text-white p-2.5 rounded-full hover:bg-black/90 z-20 text-lg shadow-lg">❯</button>
         </div>
     </div>
 
@@ -150,16 +149,16 @@
                     const treeId = `${row}${col}`;
                     
                     const cellWrapper = document.createElement('div');
-                    cellWrapper.className = 'relative w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center';
+                    cellWrapper.className = 'relative w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center';
                     cellWrapper.id = `cell-${treeId}`;
 
                     const btn = document.createElement('button');
-                    btn.className = 'w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-amber-950/90 hover:bg-emerald-600 border border-amber-700/60 flex items-center justify-center text-white font-black text-xs sm:text-sm shadow-md active:scale-95';
+                    btn.className = 'w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-amber-950/90 hover:bg-emerald-600 border border-amber-700/60 flex items-center justify-center text-white font-black text-[10px] sm:text-xs shadow-md active:scale-95';
                     btn.innerText = treeId;
                     btn.onclick = () => openTreePhotos(treeId);
 
                     if (treeId === 'M1') {
-                        btn.className = 'w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-amber-600 hover:bg-amber-500 border border-amber-400 flex items-center justify-center text-xs sm:text-sm shadow-lg active:scale-95';
+                        btn.className = 'w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-600 hover:bg-amber-500 border border-amber-400 flex items-center justify-center text-xs sm:text-sm shadow-lg active:scale-95';
                         btn.innerHTML = '🏠';
                         btn.title = 'บ้าน (M1)';
                     }
@@ -172,7 +171,7 @@
             const cellL6 = document.getElementById('cell-L6');
             if (cellL6) {
                 const houseContainer = document.createElement('div');
-                houseContainer.className = 'absolute top-0 left-0 w-[94px] h-11 pointer-events-auto';
+                houseContainer.className = 'absolute top-0 left-0 w-[68px] h-8 sm:w-[76px] sm:h-9 pointer-events-auto';
                 houseContainer.innerHTML = horizontalHouseOverlay;
                 cellL6.appendChild(houseContainer);
             }
@@ -180,7 +179,7 @@
             const cellD6 = document.getElementById('cell-D6');
             if (cellD6) {
                 const roofContainer = document.createElement('div');
-                roofContainer.className = 'absolute top-0 left-0 w-11 h-[94px] pointer-events-auto';
+                roofContainer.className = 'absolute top-0 left-0 w-8 h-[68px] sm:w-9 sm:h-[76px] pointer-events-auto';
                 roofContainer.innerHTML = verticalHipRoofOverlay;
                 cellD6.appendChild(roofContainer);
             }
@@ -215,7 +214,7 @@
             content.innerHTML = `
                 <div class="text-center py-8">
                     <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-emerald-500 border-t-transparent"></div>
-                    <p class="mt-2 text-slate-600 text-base font-semibold">กำลังค้นหารูปภาพตำแหน่ง ${titleText}...</p>
+                    <p class="mt-2 text-slate-600 text-sm font-semibold">กำลังค้นหารูปภาพตำแหน่ง ${titleText}...</p>
                 </div>
             `;
 
@@ -231,9 +230,9 @@
             if (matchedFiles.length === 0) {
                 content.innerHTML = `
                     <div class="text-center py-8">
-                        <span class="text-5xl">📷</span>
-                        <p class="mt-3 text-slate-700 text-lg font-bold">ไม่พบข้อมูลรูปภาพสำหรับตำแหน่ง ${titleText}</p>
-                        <p class="text-sm text-slate-500 mt-1">จำนวนไฟล์ทั้งหมดใน ไดร์ฟ: ${allFilesCache.length} ไฟล์</p>
+                        <span class="text-4xl">📷</span>
+                        <p class="mt-3 text-slate-700 text-base font-bold">ไม่พบข้อมูลรูปภาพสำหรับตำแหน่ง ${titleText}</p>
+                        <p class="text-xs text-slate-500 mt-1">จำนวนไฟล์ทั้งหมดใน ไดร์ฟ: ${allFilesCache.length} ไฟล์</p>
                     </div>
                 `;
                 return;
@@ -246,12 +245,12 @@
 
             const years = [...new Set(matchedFiles.map(f => {
                 const match = f.name.match(/[-_](\d{4})/);
-                return match ? match[1] : 'อื่น ';
+                return match ? match[1] : 'อื่น';
             }))].sort().reverse();
 
-            yearTabs.innerHTML = `<button onclick="renderPhotoGrid('all')" class="bg-emerald-600 text-white px-3.5 py-1.5 rounded-full text-sm font-bold shadow">ทั้งหมด (${currentFilteredPhotos.length})</button>`;
+            yearTabs.innerHTML = `<button onclick="renderPhotoGrid('all')" class="bg-emerald-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow">ทั้งหมด (${currentFilteredPhotos.length})</button>`;
             years.forEach(yr => {
-                yearTabs.innerHTML += `<button onclick="renderPhotoGrid('${yr}')" class="bg-slate-100 text-slate-700 px-3.5 py-1.5 rounded-full text-sm font-bold hover:bg-emerald-100 shadow-sm border border-slate-200">ปี ${yr}</button>`;
+                yearTabs.innerHTML += `<button onclick="renderPhotoGrid('${yr}')" class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-emerald-100 shadow-sm border border-slate-200">ปี ${yr}</button>`;
             });
 
             renderPhotoGrid('all');
@@ -259,7 +258,7 @@
 
         function renderPhotoGrid(filterYear) {
             const content = document.getElementById('modalContent');
-            content.innerHTML = '<div class="grid grid-cols-2 gap-3.5 w-full max-h-[52vh] overflow-y-auto p-1.5" id="photoGrid"></div>';
+            content.innerHTML = '<div class="grid grid-cols-2 gap-3 w-full max-h-[50vh] overflow-y-auto p-1" id="photoGrid"></div>';
             const photoGrid = document.getElementById('photoGrid');
 
             const list = filterYear === 'all' 
@@ -267,19 +266,19 @@
                 : currentFilteredPhotos.filter(item => item.fileName.toLowerCase().includes(filterYear));
 
             if (list.length === 0) {
-                content.innerHTML = `<p class="text-slate-500 text-base py-6 font-semibold">ไม่พบรูปภาพในปี ${filterYear}</p>`;
+                content.innerHTML = `<p class="text-slate-500 text-sm py-6 font-semibold">ไม่พบรูปภาพในปี ${filterYear}</p>`;
                 return;
             }
 
             list.forEach((item) => {
                 const realIndex = currentFilteredPhotos.indexOf(item);
                 const card = document.createElement('div');
-                card.className = 'relative rounded-2xl overflow-hidden border-2 border-slate-200 aspect-square bg-slate-100 cursor-pointer group shadow-md hover:border-emerald-500 transition';
+                card.className = 'relative rounded-xl overflow-hidden border border-slate-200 aspect-square bg-slate-100 cursor-pointer group shadow-sm hover:border-emerald-500 transition';
                 card.onclick = () => openLightbox(realIndex);
 
                 card.innerHTML = `
                     <img src="${item.url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-200" loading="lazy" referrerpolicy="no-referrer">
-                    <div class="absolute bottom-0 inset-x-0 bg-black/80 text-white text-xs sm:text-sm p-2 truncate text-center font-mono font-semibold tracking-wider">
+                    <div class="absolute bottom-0 inset-x-0 bg-black/80 text-white text-[11px] p-1.5 truncate text-center font-mono font-semibold tracking-wider">
                         ${item.fileName}
                     </div>
                 `;
@@ -300,8 +299,8 @@
             const content = document.getElementById('modalContent');
             content.innerHTML = `
                 <div class="text-center py-10">
-                    <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-emerald-500 border-t-transparent"></div>
-                    <p class="mt-3 text-slate-700 text-base font-bold">กำลังอัปโหลดรูปภาพขึ้น Google Drive...</p>
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-emerald-500 border-t-transparent"></div>
+                    <p class="mt-3 text-slate-700 text-sm font-bold">กำลังอัปโหลดรูปภาพขึ้น Google Drive...</p>
                 </div>
             `;
 
@@ -323,7 +322,10 @@
                     });
                     const result = await response.json();
 
-                    if (result.result === 'success') {
+                    // รองรับผลลัพธ์ทั้งแบบ result.result และ result.status เพื่อความชัวร์
+                    const isSuccess = (result.result === 'success' || result.status === 'success' || result.success === true);
+
+                    if (isSuccess) {
                         document.getElementById('cameraInput').value = '';
                         allFilesCache = [];
                         await openTreePhotos(...activeTreeIds);
@@ -455,4 +457,4 @@
         document.addEventListener('DOMContentLoaded', initData);
     </script>
 </body>
-</html>     
+</html>
