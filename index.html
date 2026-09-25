@@ -20,9 +20,10 @@
     </header>
 
     <!-- Main Map Area -->
-    <main class="flex-1 relative w-full h-full overflow-hidden flex items-center justify-center bg-slate-950 p-1">
-        <div class="relative w-full h-full bg-emerald-950/40 border border-emerald-600/50 rounded-xl flex items-center justify-center overflow-hidden">
-            <div class="grid grid-cols-6 gap-2.5 sm:gap-3 relative scale-[1.9] sm:scale-[2.3] origin-center" id="treeGrid"></div>
+    <main class="flex-1 relative w-full h-full overflow-auto flex items-center justify-center bg-slate-950 p-2">
+        <div class="relative bg-emerald-950/40 border border-emerald-600/50 rounded-xl flex items-center justify-center p-2 shadow-xl">
+            <!-- นำ scale ออก เพื่อให้แสดงผลพอดีหน้าจอแบบรูปที่ 2 -->
+            <div class="grid grid-cols-6 gap-1.5 sm:gap-2 relative" id="treeGrid"></div>
         </div>
     </main>
 
