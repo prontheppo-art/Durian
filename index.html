@@ -20,7 +20,7 @@
 </head>
 <body class="bg-slate-900 text-white h-[100dvh] w-screen flex flex-col select-none overflow-hidden">
 
-    <!-- Header (ตัวนับยอดผู้เข้าชมที่มุมขวาบน) -->
+    <!-- Header -->
     <header class="bg-slate-800 border-b border-slate-700 py-2 px-3 sm:py-2.5 sm:px-4 flex justify-between items-center z-20 shadow-md shrink-0">
         <h1 class="text-sm sm:text-lg font-bold">Panoramic Minor Garden</h1>
         
@@ -30,11 +30,10 @@
         </div>
     </header>
 
-    <!-- Main Map Area (ปรับให้เลื่อนดูแผนผังทั้งหมดได้อย่างลื่นไหลและพอดีจอ) -->
+    <!-- Main Map Area (ปรับขนาด scale ให้เล็กลงพอดีจอ ไม่ล้น) -->
     <main class="flex-1 relative w-full h-full overflow-auto flex items-center justify-center bg-slate-950 p-2 sm:p-4">
         <div class="relative w-full h-full bg-emerald-950/40 border border-emerald-600/50 rounded-xl flex items-center justify-center overflow-auto p-4">
-            <!-- ปรับขนาด scale และ gap ให้พอดีกับการแสดงผลทุกหน้าจอ ไม่ล้นเกินไป -->
-            <div class="grid grid-cols-6 gap-2 sm:gap-3 relative scale-[0.85] sm:scale-100 origin-center my-auto" id="treeGrid"></div>
+            <div class="grid grid-cols-6 gap-2 sm:gap-2.5 relative scale-[0.65] sm:scale-85 origin-center my-auto" id="treeGrid"></div>
         </div>
     </main>
 
