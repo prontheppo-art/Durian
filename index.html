@@ -304,16 +304,16 @@
                 </div>
             `;
 
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const treePrefix = activeTreeIds.length > 0 ? activeTreeIds[0] : 'Tree';
+            const fileName = `${treePrefix}-${yyyy}-${mm}-${dd}.jpg`;
+
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const base64Image = e.target.result;
-                
-                const now = new Date();
-                const yyyy = now.getFullYear();
-                const mm = String(now.getMonth() + 1).padStart(2, '0');
-                const dd = String(now.getDate()).padStart(2, '0');
-                const treePrefix = activeTreeIds.length > 0 ? activeTreeIds[0] : 'Tree';
-                const fileName = `${treePrefix}-${yyyy}-${mm}-${dd}.jpg`;
 
                 try {
                     const response = await fetch(GAS_WEB_APP_URL, {
@@ -331,9 +331,33 @@
                         openTreePhotos(...activeTreeIds);
                     }
                 } catch (err) {
-                    console.error('[Upload Error]:', err);
-                    alert('เกิดข้อผิดพลาดในการเชื่อมต่อเพื่ออัปโหลด');
-                    openTreePhotos(...activeTreeIds);
+                    console.error('[Upload Error - JSON trying FormData fallback]:', err);
+                    
+                    // Fallback วิธีส่งแบบ FormData เผื่อเซิร์ฟเวอร์รับ JSON ตรงๆ ไม่ได้
+                    try {
+                        const formData = new FormData();
+                        formData.append('image', file, fileName);
+                        formData.append('fileName', fileName);
+
+                        const response2 = await fetch(GAS_WEB_APP_URL, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const result2 = await response2.json();
+
+                        if (result2.result === 'success') {
+                            document.getElementById('cameraInput').value = '';
+                            allFilesCache = [];
+                            await openTreePhotos(...activeTreeIds);
+                        } else {
+                            alert('อัปโหลดไม่สำเร็จ (รอบ 2): ' + (result2.error || 'Unknown'));
+                            openTreePhotos(...activeTreeIds);
+                        }
+                    } catch (err2) {
+                        console.error('[Upload Error 2]:', err2);
+                        alert('เกิดข้อผิดพลาดในการเชื่อมต่อเพื่ออัปโหลด กรุณาตรวจสอบอินเทอร์เน็ตหรือสิทธิ์สคริปต์');
+                        openTreePhotos(...activeTreeIds);
+                    }
                 }
             };
             reader.readAsDataURL(file);
