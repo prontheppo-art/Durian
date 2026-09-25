@@ -1,0 +1,377 @@
+const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx4L0jtcCfYHPIVMQdP-YF1XCTnu6iXG2IsO-11Id5Wdt170mN8GzWdzcD2pE1BVajt/exec';
+
+const rows = ['M', 'L', 'K', 'J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'];
+const cols = [6, 5, 4, 3, 2, 1];
+
+let allFilesCache = [];
+let currentFilteredPhotos = [];
+let currentPhotoIndex = 0;
+let activeTreeIds = [];
+
+const verticalHipRoofOverlay = `
+    <div onclick="openTreePhotos('D6', 'C6')" class="absolute inset-0 bg-slate-900/90 border border-orange-500 rounded-xl p-0.5 cursor-pointer hover:border-orange-400 transition shadow-lg flex items-center justify-center z-10">
+        <svg class="w-full h-full" viewBox="0 0 40 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="roofOrangeVert" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#EA580C" />
+                    <stop offset="50%" stop-color="#F97316" />
+                    <stop offset="100%" stop-color="#EA580C" />
+                </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="36" height="96" rx="4" fill="url(#roofOrangeVert)" stroke="#9A3412" stroke-width="1.5"/>
+            <line x1="2" y1="28" x2="38" y2="28" stroke="#7C2D12" stroke-width="1" stroke-dasharray="2 1"/>
+            <line x1="2" y1="72" x2="38" y2="72" stroke="#7C2D12" stroke-width="1" stroke-dasharray="2 1"/>
+            <line x1="2" y1="2" x2="20" y2="14" stroke="#FFEDD5" stroke-width="1.5"/>
+            <line x1="38" y1="2" x2="20" y2="14" stroke="#FFEDD5" stroke-width="1.5"/>
+            <line x1="20" y1="14" x2="20" y2="28" stroke="#FFEDD5" stroke-width="2"/>
+            <line x1="2" y1="28" x2="20" y2="50" stroke="#FFEDD5" stroke-width="1.5"/>
+            <line x1="38" y1="28" x2="20" y2="50" stroke="#FFEDD5" stroke-width="1.5"/>
+            <line x1="2" y1="72" x2="20" y2="50" stroke="#FFEDD5" stroke-width="1.5"/>
+            <line x1="38" y1="72" x2="20" y2="50" stroke="#FFEDD5" stroke-width="1.5"/>
+            <line x1="20" y1="72" x2="20" y2="86" stroke="#FFEDD5" stroke-width="2"/>
+            <line x1="20" y1="86" x2="2" y2="98" stroke="#FFEDD5" stroke-width="1.5"/>
+            <line x1="20" y1="86" x2="38" y2="98" stroke="#FFEDD5" stroke-width="1.5"/>
+        </svg>
+    </div>
+`;
+
+const horizontalHouseOverlay = `
+    <div onclick="openTreePhotos('L6', 'L5')" class="absolute inset-0 bg-amber-950/90 border border-amber-500 rounded-xl p-0.5 cursor-pointer hover:border-amber-400 transition shadow-lg flex items-center justify-center z-10">
+        <svg class="w-full h-full" viewBox="0 0 100 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="20" y="14" width="42" height="22" rx="2" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/>
+            <path d="M 12 14 Q 41 4 70 14" stroke="#B45309" stroke-width="4" stroke-linecap="round" fill="none"/>
+            <rect x="26" y="19" width="8" height="8" rx="1" fill="#78350F" stroke="#FDE68A" stroke-width="1"/>
+            <rect x="42" y="19" width="8" height="10" rx="1" fill="#78350F" stroke="#FDE68A" stroke-width="1"/>
+            <path d="M 62 19 L 88 22" stroke="#B45309" stroke-width="3" stroke-linecap="round"/>
+            <line x1="85" y1="22" x2="85" y2="36" stroke="#D97706" stroke-width="2"/>
+        </svg>
+    </div>
+`;
+
+async function loadVisitorCount() {
+    try {
+        const response = await fetch('https://api.counterapi.dev/v1/panoramic-minor-garden-th/visits/up');
+        const data = await response.json();
+        if (data && data.count !== undefined) {
+            document.getElementById('visitorCount').innerText = `${data.count.toLocaleString()} ครั้ง`;
+        } else {
+            document.getElementById('visitorCount').innerText = '1 ครั้ง';
+        }
+    } catch (err) {
+        console.error('[Visitor Counter Error]:', err);
+        document.getElementById('visitorCount').innerText = '-';
+    }
+}
+
+function generateMap() {
+    const gridContainer = document.getElementById('treeGrid');
+    gridContainer.innerHTML = '';
+
+    rows.forEach(row => {
+        cols.forEach(col => {
+            const treeId = `${row}${col}`;
+            
+            const cellWrapper = document.createElement('div');
+            cellWrapper.className = 'relative w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center';
+            cellWrapper.id = `cell-${treeId}`;
+
+            const btn = document.createElement('button');
+            btn.className = 'w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-amber-950/90 hover:bg-emerald-600 border border-amber-700/60 flex items-center justify-center text-white font-black text-xs sm:text-sm shadow-md active:scale-95';
+            btn.innerText = treeId;
+            btn.onclick = () => openTreePhotos(treeId);
+
+            if (treeId === 'M1') {
+                btn.className = 'w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-amber-600 hover:bg-amber-500 border border-amber-400 flex items-center justify-center text-xs sm:text-sm shadow-lg active:scale-95';
+                btn.innerHTML = '🏠';
+                btn.title = 'บ้าน (M1)';
+            }
+
+            cellWrapper.appendChild(btn);
+            gridContainer.appendChild(cellWrapper);
+        });
+    });
+
+    const cellL6 = document.getElementById('cell-L6');
+    if (cellL6) {
+        const houseContainer = document.createElement('div');
+        houseContainer.className = 'absolute top-0 left-0 w-[94px] h-11 pointer-events-auto';
+        houseContainer.innerHTML = horizontalHouseOverlay;
+        cellL6.appendChild(houseContainer);
+    }
+
+    const cellD6 = document.getElementById('cell-D6');
+    if (cellD6) {
+        const roofContainer = document.createElement('div');
+        roofContainer.className = 'absolute top-0 left-0 w-11 h-[94px] pointer-events-auto';
+        roofContainer.innerHTML = verticalHipRoofOverlay;
+        cellD6.appendChild(roofContainer);
+    }
+}
+
+async function fetchStorageFiles() {
+    try {
+        const response = await fetch(GAS_WEB_APP_URL);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+
+        if (Array.isArray(data) && data.length > 0) {
+            allFilesCache = data;
+        }
+    } catch (err) {
+        console.error('[Google Drive ERROR]:', err);
+    }
+}
+
+async function openTreePhotos(...treeIds) {
+    activeTreeIds = treeIds;
+    const modal = document.getElementById('photoModal');
+    const title = document.getElementById('modalTitle');
+    const yearTabs = document.getElementById('yearTabs');
+    const content = document.getElementById('modalContent');
+
+    const titleText = treeIds.join('-');
+    title.innerText = `${titleText} PHOTO FILES`;
+    yearTabs.innerHTML = '';
+    modal.classList.remove('hidden');
+
+    content.innerHTML = `
+        <div class="text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-emerald-500 border-t-transparent"></div>
+            <p class="mt-2 text-slate-600 text-base font-semibold">กำลังค้นหารูปภาพตำแหน่ง ${titleText}...</p>
+        </div>
+    `;
+
+    if (allFilesCache.length === 0) {
+        await fetchStorageFiles();
+    }
+
+    const regexList = treeIds.map(id => new RegExp(`^${id}[-_]\\d{4}`, 'i'));
+    const matchedFiles = allFilesCache.filter(fileObj => 
+        regexList.some(regex => regex.test(fileObj.name))
+    );
+
+    if (matchedFiles.length === 0) {
+        content.innerHTML = `
+            <div class="text-center py-8">
+                <span class="text-5xl">📷</span>
+                <p class="mt-3 text-slate-700 text-lg font-bold">ไม่พบข้อมูลรูปภาพสำหรับตำแหน่ง ${titleText}</p>
+                <p class="text-sm text-slate-500 mt-1">จำนวนไฟล์ทั้งหมดใน ไดร์ฟ: ${allFilesCache.length} ไฟล์</p>
+            </div>
+        `;
+        return;
+    }
+
+    currentFilteredPhotos = matchedFiles.map(fileObj => ({
+        fileName: fileObj.name,
+        url: fileObj.url
+    }));
+
+    const years = [...new Set(matchedFiles.map(f => {
+        const match = f.name.match(/[-_](\d{4})/);
+        return match ? match[1] : 'อื่น ';
+    }))].sort().reverse();
+
+    yearTabs.innerHTML = `<button onclick="renderPhotoGrid('all')" class="bg-emerald-600 text-white px-3.5 py-1.5 rounded-full text-sm font-bold shadow">ทั้งหมด (${currentFilteredPhotos.length})</button>`;
+    years.forEach(yr => {
+        yearTabs.innerHTML += `<button onclick="renderPhotoGrid('${yr}')" class="bg-slate-100 text-slate-700 px-3.5 py-1.5 rounded-full text-sm font-bold hover:bg-emerald-100 shadow-sm border border-slate-200">ปี ${yr}</button>`;
+    });
+
+    renderPhotoGrid('all');
+}
+
+function renderPhotoGrid(filterYear) {
+    const content = document.getElementById('modalContent');
+    content.innerHTML = '<div class="grid grid-cols-2 gap-3.5 w-full max-h-[52vh] overflow-y-auto p-1.5" id="photoGrid"></div>';
+    const photoGrid = document.getElementById('photoGrid');
+
+    const list = filterYear === 'all' 
+        ? currentFilteredPhotos 
+        : currentFilteredPhotos.filter(item => item.fileName.toLowerCase().includes(filterYear));
+
+    if (list.length === 0) {
+        content.innerHTML = `<p class="text-slate-500 text-base py-6 font-semibold">ไม่พบรูปภาพในปี ${filterYear}</p>`;
+        return;
+    }
+
+    list.forEach((item) => {
+        const realIndex = currentFilteredPhotos.indexOf(item);
+        const card = document.createElement('div');
+        card.className = 'relative rounded-2xl overflow-hidden border-2 border-slate-200 aspect-square bg-slate-100 cursor-pointer group shadow-md hover:border-emerald-500 transition';
+        card.onclick = () => openLightbox(realIndex);
+
+        card.innerHTML = `
+            <img src="${item.url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-200" loading="lazy" referrerpolicy="no-referrer">
+            <div class="absolute bottom-0 inset-x-0 bg-black/80 text-white text-xs sm:text-sm p-2 truncate text-center font-mono font-semibold tracking-wider">
+                ${item.fileName}
+            </div>
+        `;
+        photoGrid.appendChild(card);
+    });
+}
+
+function triggerCamera() {
+    const cameraInput = document.getElementById('cameraInput');
+    cameraInput.value = '';
+    cameraInput.click();
+}
+
+async function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const content = document.getElementById('modalContent');
+    content.innerHTML = `
+        <div class="text-center py-10">
+            <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-emerald-500 border-t-transparent"></div>
+            <p class="mt-3 text-slate-700 text-base font-bold">กำลังอัปโหลดรูปภาพขึ้น Google Drive...</p>
+        </div>
+    `;
+
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        const base64Image = e.target.result;
+        
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const treePrefix = activeTreeIds.length > 0 ? activeTreeIds[0] : 'Tree';
+        const fileName = `${treePrefix}-${yyyy}-${mm}-${dd}.jpg`;
+
+        try {
+            const response = await fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ image: base64Image, fileName: fileName })
+            });
+            const result = await response.json();
+
+            if (result && (result.status === 'success' || result.result === 'success')) {
+                document.getElementById('cameraInput').value = '';
+                allFilesCache = [];
+                await openTreePhotos(...activeTreeIds);
+            } else {
+                alert('อัปโหลดไม่สำเร็จ: ' + (result.error || 'Unknown error'));
+                openTreePhotos(...activeTreeIds);
+            }
+        } catch (err) {
+            console.error('[Upload Error]:', err);
+            alert('เกิดข้อผิดพลาดในการเชื่อมต่อเพื่ออัปโหลด');
+            openTreePhotos(...activeTreeIds);
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+function openLightbox(index) {
+    currentPhotoIndex = index;
+    updateLightboxContent();
+    document.getElementById('lightboxModal').classList.remove('hidden');
+}
+
+function updateLightboxContent() {
+    if (currentFilteredPhotos.length === 0) return;
+    resetZoom();
+    const currentItem = currentFilteredPhotos[currentPhotoIndex];
+    const img = document.getElementById('lightboxImg');
+    img.src = currentItem.url;
+    img.setAttribute('referrerpolicy', 'no-referrer');
+    document.getElementById('lightboxTitle').innerText = `${currentItem.fileName} (${currentPhotoIndex + 1}/${currentFilteredPhotos.length})`;
+}
+
+function prevImage() {
+    if (currentFilteredPhotos.length === 0) return;
+    currentPhotoIndex = (currentPhotoIndex - 1 + currentFilteredPhotos.length) % currentFilteredPhotos.length;
+    updateLightboxContent();
+}
+
+function nextImage() {
+    if (currentFilteredPhotos.length === 0) return;
+    currentPhotoIndex = (currentPhotoIndex + 1) % currentFilteredPhotos.length;
+    updateLightboxContent();
+}
+
+function closeModal(modalId) {
+    if (modalId === 'lightboxModal') resetZoom();
+    document.getElementById(modalId).classList.add('hidden');
+}
+
+function closeModalOnOutside(event, modalId) {
+    if (event.target.id === modalId) {
+        closeModal(modalId);
+    }
+}
+
+const lightboxImg = document.getElementById('lightboxImg');
+const swipeArea = document.getElementById('swipeArea');
+
+let scale = 1;
+let startDist = 0;
+let startScale = 1;
+let posX = 0, posY = 0;
+let startX = 0, startY = 0;
+let touchStartX = 0, touchEndX = 0;
+let isDragging = false;
+
+function resetZoom() {
+    scale = 1;
+    posX = 0;
+    posY = 0;
+    lightboxImg.style.transform = `translate(0px, 0px) scale(1)`;
+}
+
+function getDistance(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.hypot(dx, dy);
+}
+
+lightboxImg.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+        startDist = getDistance(e.touches);
+        startScale = scale;
+    } else if (e.touches.length === 1) {
+        if (scale > 1) {
+            isDragging = true;
+            startX = e.touches[0].clientX - posX;
+            startY = e.touches[0].clientY - posY;
+        } else {
+            touchStartX = e.touches[0].clientX;
+        }
+    }
+}, { passive: false });
+
+lightboxImg.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2) {
+        e.preventDefault();
+        const dist = getDistance(e.touches);
+        if (startDist > 0) {
+            scale = Math.min(Math.max(startScale * (dist / startDist), 1), 4);
+            lightboxImg.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+        }
+    } else if (e.touches.length === 1 && scale > 1 && isDragging) {
+        e.preventDefault();
+        posX = e.touches[0].clientX - startX;
+        posY = e.touches[0].clientY - startY;
+        lightboxImg.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+    }
+}, { passive: false });
+
+lightboxImg.addEventListener('touchend', (e) => {
+    isDragging = false;
+    if (scale <= 1) {
+        resetZoom();
+    }
+    if (scale === 1 && e.changedTouches.length === 1) {
+        touchEndX = e.changedTouches.length > 0 ? e.changedTouches[0].clientX : 0;
+        if (touchEndX < touchStartX - 50) nextImage();
+        if (touchEndX > touchStartX + 50) prevImage();
+    }
+}, false);
+
+function initData() {
+    generateMap();
+    fetchStorageFiles();
+    loadVisitorCount();
+}
+
+document.addEventListener('DOMContentLoaded', initData);
