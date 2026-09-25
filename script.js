@@ -245,7 +245,7 @@ async function handleImageUpload(event) {
             });
             const result = await response.json();
 
-            if (result && (result.status === 'success' || result.result === 'success')) {
+            if (result.result === 'success') {
                 document.getElementById('cameraInput').value = '';
                 allFilesCache = [];
                 await openTreePhotos(...activeTreeIds);
