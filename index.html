@@ -8,7 +8,7 @@
     <style>
         body { font-family: 'Sarabun', sans-serif; }
         html, body {
-            touch-action: none;
+            touch-action: manipulation;
             overflow: hidden;
             width: 100vw;
             height: 100dvh;
@@ -21,19 +21,20 @@
 <body class="bg-slate-900 text-white h-[100dvh] w-screen flex flex-col select-none overflow-hidden">
 
     <!-- Header (ตัวนับยอดผู้เข้าชมที่มุมขวาบน) -->
-    <header class="bg-slate-800 border-b border-slate-700 py-2.5 px-4 flex justify-between items-center z-20 shadow-md shrink-0">
-        <h1 class="text-base sm:text-lg font-bold">Panoramic Minor Garden</h1>
+    <header class="bg-slate-800 border-b border-slate-700 py-2 px-3 sm:py-2.5 sm:px-4 flex justify-between items-center z-20 shadow-md shrink-0">
+        <h1 class="text-sm sm:text-lg font-bold">Panoramic Minor Garden</h1>
         
-        <div class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-700/80 px-2.5 py-1 rounded-full text-xs font-mono text-emerald-400 shadow-inner">
-            <span class="text-sm">👁️</span>
+        <div class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-700/80 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-mono text-emerald-400 shadow-inner">
+            <span class="text-xs sm:text-sm">👁️</span>
             <span id="visitorCount">...</span>
         </div>
     </header>
 
-    <!-- Main Map Area -->
-    <main class="flex-1 relative w-full h-full overflow-hidden flex items-center justify-center bg-slate-950 p-1">
-        <div class="relative w-full h-full bg-emerald-950/40 border border-emerald-600/50 rounded-xl flex items-center justify-center overflow-hidden">
-            <div class="grid grid-cols-6 gap-2.5 sm:gap-3 relative scale-[1.9] sm:scale-[2.3] origin-center" id="treeGrid"></div>
+    <!-- Main Map Area (ปรับให้เลื่อนดูแผนผังทั้งหมดได้อย่างลื่นไหลและพอดีจอ) -->
+    <main class="flex-1 relative w-full h-full overflow-auto flex items-center justify-center bg-slate-950 p-2 sm:p-4">
+        <div class="relative w-full h-full bg-emerald-950/40 border border-emerald-600/50 rounded-xl flex items-center justify-center overflow-auto p-4">
+            <!-- ปรับขนาด scale และ gap ให้พอดีกับการแสดงผลทุกหน้าจอ ไม่ล้นเกินไป -->
+            <div class="grid grid-cols-6 gap-2 sm:gap-3 relative scale-[0.85] sm:scale-100 origin-center my-auto" id="treeGrid"></div>
         </div>
     </main>
 
@@ -49,7 +50,6 @@
                 <div id="yearTabs" class="flex gap-2 overflow-x-auto pb-1 flex-1 text-sm sm:text-base font-bold"></div>
                 
                 <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(event)">
-                <!-- ขยายปุ่มถ่ายรูปให้ตัวหนังสือโตขึ้น -->
                 <button onclick="triggerCamera()" id="uploadBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4.5 py-2.5 sm:py-3 rounded-xl text-base sm:text-lg font-black flex items-center gap-2 shadow-lg shrink-0 active:scale-95 transition">
                     <span class="text-xl">📷</span> ถ่ายรูปต้นนี้
                 </button>
@@ -277,7 +277,6 @@
                 card.className = 'relative rounded-2xl overflow-hidden border-2 border-slate-200 aspect-square bg-slate-100 cursor-pointer group shadow-md hover:border-emerald-500 transition';
                 card.onclick = () => openLightbox(realIndex);
 
-                // ปรับแต่งป้ายชื่อไฟล์ด้านล่างรูปให้ตัวหนังสือใหญ่ขึ้น หนาขึ้น และสีชัดเจนขึ้น
                 card.innerHTML = `
                     <img src="${item.url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-200" loading="lazy" referrerpolicy="no-referrer">
                     <div class="absolute bottom-0 inset-x-0 bg-black/85 text-emerald-300 text-sm sm:text-base py-2 px-1 truncate text-center font-mono font-bold tracking-wide shadow-lg">
@@ -294,7 +293,6 @@
             cameraInput.click();
         }
 
-        // ใช้ฟังก์ชันการอัปโหลดดั้งเดิมที่ทำงานได้จริง 100%
         async function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
