@@ -20,17 +20,25 @@
 </head>
 <body class="bg-slate-900 text-white h-[100dvh] w-screen flex flex-col select-none overflow-hidden">
 
-    <!-- Header (ตัวนับยอดผู้เข้าชมที่มุมขวาบน) -->
+    <!-- Header (เพิ่มปุ่มลิงก์ไป capture.html ที่มุมขวาบนข้างตัวนับ) -->
     <header class="bg-slate-800 border-b border-slate-700 py-2 px-4 flex justify-between items-center z-20 shadow-md shrink-0">
         <h1 class="text-sm sm:text-base font-bold">Panoramic Minor Garden</h1>
         
-        <div class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-700/80 px-2 py-0.5 rounded-full text-xs font-mono text-emerald-400 shadow-inner">
-            <span class="text-xs">👁️</span>
-            <span id="visitorCount">...</span>
+        <div class="flex items-center gap-2">
+            <!-- ปุ่มลิงก์ไป capture.html -->
+            <a href="capture.html" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow transition active:scale-95" title="ไปหน้า Capture">
+                <span>📷</span> <span class="hidden sm:inline">Capture</span>
+            </a>
+
+            <!-- ตัวนับยอดผู้เข้าชม -->
+            <div class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-700/80 px-2 py-0.5 rounded-full text-xs font-mono text-emerald-400 shadow-inner">
+                <span class="text-xs">👁️</span>
+                <span id="visitorCount">...</span>
+            </div>
         </div>
     </header>
 
-    <!-- Main Map Area (ขนาดพอดีหน้าจอตามรูปที่ 1) -->
+    <!-- Main Map Area -->
     <main class="flex-1 relative w-full h-full overflow-hidden flex items-center justify-center bg-slate-950 p-1">
         <div class="relative w-full h-full bg-emerald-950/40 border border-emerald-600/50 rounded-xl flex items-center justify-center overflow-hidden">
             <div class="grid grid-cols-6 gap-1.5 sm:gap-2 relative scale-[0.95] sm:scale-100 origin-center" id="treeGrid"></div>
@@ -292,7 +300,6 @@
             cameraInput.click();
         }
 
-        // ฟังก์ชันช่วยย่อขนาดรูปภาพ (Image Compression) ป้องกันไฟล์ใหญ่เกินไปใน Google Chrome
         function compressImage(file, maxWidth = 1280, maxHeight = 1280, quality = 0.8) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -343,7 +350,6 @@
             `;
 
             try {
-                // บีบอัดรูปภาพก่อนส่ง เพื่อให้ส่งผ่าน Google Chrome และ Google Apps Script ได้ฉลุย
                 const base64Image = await compressImage(file);
                 
                 const now = new Date();
