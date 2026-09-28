@@ -48,7 +48,6 @@
             <div class="flex justify-between items-center mb-4 gap-2">
                 <div id="yearTabs" class="flex gap-2 overflow-x-auto pb-1 flex-1 text-sm font-bold"></div>
                 
-                <!-- ปุ่มเลือกไฟล์ (สร้างสำเนาข้อมูลมาเปลี่ยนชื่อและอัปโหลด โดยไม่ยุ่งกับต้นฉบับ) -->
                 <input type="file" id="cameraInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
                 <button onclick="triggerCamera()" id="uploadBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1 shadow-md shrink-0 active:scale-95 transition">
                     <span>🖼️</span> เลือกรูปมาเปลี่ยนชื่อและอัปโหลด
@@ -86,8 +85,9 @@
         let currentPhotoIndex = 0;
         let activeTreeIds = [];
 
+        // โซนสีเหลืองแนวตั้ง (D6-C6) - ปิดการคลิกทะลุ
         const verticalHipRoofOverlay = `
-            <div onclick="openTreePhotos('D6', 'C6')" class="absolute inset-0 bg-slate-900/90 border border-orange-500 rounded-xl p-0.5 cursor-pointer hover:border-orange-400 transition shadow-lg flex items-center justify-center z-10">
+            <div class="absolute inset-0 bg-slate-900/90 border border-orange-500 rounded-xl p-0.5 shadow-lg flex items-center justify-center z-10 pointer-events-none">
                 <svg class="w-full h-full" viewBox="0 0 40 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient id="roofOrangeVert" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -113,8 +113,9 @@
             </div>
         `;
 
+        // โซนสีเหลืองแนวนอน (L6-L5) - ปิดการคลิกทะลุ
         const horizontalHouseOverlay = `
-            <div onclick="openTreePhotos('L6', 'L5')" class="absolute inset-0 bg-amber-950/90 border border-amber-500 rounded-xl p-0.5 cursor-pointer hover:border-amber-400 transition shadow-lg flex items-center justify-center z-10">
+            <div class="absolute inset-0 bg-amber-950/90 border border-amber-500 rounded-xl p-0.5 shadow-lg flex items-center justify-center z-10 pointer-events-none">
                 <svg class="w-full h-full" viewBox="0 0 100 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect x="20" y="14" width="42" height="22" rx="2" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/>
                     <path d="M 12 14 Q 41 4 70 14" stroke="#B45309" stroke-width="4" stroke-linecap="round" fill="none"/>
@@ -154,14 +155,28 @@
                     cellWrapper.id = `cell-${treeId}`;
 
                     const btn = document.createElement('button');
-                    btn.className = 'w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-amber-950/90 hover:bg-emerald-600 border border-amber-700/60 flex items-center justify-center text-white font-black text-[10px] sm:text-xs shadow-md active:scale-95';
-                    btn.innerText = treeId;
-                    btn.onclick = () => openTreePhotos(treeId);
+                    
+                    // ตรวจสอบพื้นที่สิ่งปลูกสร้าง L5, L6, C6, D6 ให้กดไม่ได้
+                    const isBuilding = ['L6', 'L5', 'D6', 'C6'].includes(treeId);
 
-                    if (treeId === 'M1') {
+                    if (isBuilding) {
+                        // สไตล์สำหรับช่องสิ่งปลูกสร้าง (กดไม่ได้)
+                        btn.className = 'w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-800/40 border border-slate-700/30 flex items-center justify-center text-slate-500 font-black text-[10px] sm:text-xs cursor-not-allowed opacity-40';
+                        btn.innerText = treeId;
+                        btn.disabled = true; // ปิดการใช้งานปุ่มอย่างสมบูรณ์
+                    } else if (treeId === 'M1') {
+                        // ปุ่มสีแดง (M1) เปลี่ยนหน้าไป index.html
                         btn.className = 'w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-600 hover:bg-amber-500 border border-amber-400 flex items-center justify-center text-xs sm:text-sm shadow-lg active:scale-95';
                         btn.innerHTML = '🏠';
-                        btn.title = 'บ้าน (M1)';
+                        btn.title = 'หน้าแรก (index.html)';
+                        btn.onclick = () => {
+                            window.location.href = 'index.html';
+                        };
+                    } else {
+                        // ปุ่มต้นไม้ปกติ (กดได้)
+                        btn.className = 'w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-amber-950/90 hover:bg-emerald-600 border border-amber-700/60 flex items-center justify-center text-white font-black text-[10px] sm:text-xs shadow-md active:scale-95';
+                        btn.innerText = treeId;
+                        btn.onclick = () => openTreePhotos(treeId);
                     }
 
                     cellWrapper.appendChild(btn);
@@ -169,18 +184,20 @@
                 });
             });
 
+            // วาง Overlay บ้าน (L6 ครอบไป L5 ด้วย)
             const cellL6 = document.getElementById('cell-L6');
             if (cellL6) {
                 const houseContainer = document.createElement('div');
-                houseContainer.className = 'absolute top-0 left-0 w-[68px] h-8 sm:w-[76px] sm:h-9 pointer-events-auto';
+                houseContainer.className = 'absolute top-0 left-0 w-[68px] h-8 sm:w-[76px] sm:h-9 pointer-events-none';
                 houseContainer.innerHTML = horizontalHouseOverlay;
                 cellL6.appendChild(houseContainer);
             }
 
+            // วาง Overlay หลังคา (D6 ครอบลงมา C6 ด้วย)
             const cellD6 = document.getElementById('cell-D6');
             if (cellD6) {
                 const roofContainer = document.createElement('div');
-                roofContainer.className = 'absolute top-0 left-0 w-8 h-[68px] sm:w-9 sm:h-[76px] pointer-events-auto';
+                roofContainer.className = 'absolute top-0 left-0 w-8 h-[68px] sm:w-9 sm:h-[76px] pointer-events-none';
                 roofContainer.innerHTML = verticalHipRoofOverlay;
                 cellD6.appendChild(roofContainer);
             }
@@ -343,7 +360,6 @@
             `;
 
             try {
-                // ก๊อปปี้ข้อมูลและบีบอัดรูปภาพต้นฉบับออกมาเป็นสำเนารูปแบบใหม่
                 const base64Image = await compressImage(file);
                 
                 const now = new Date();
@@ -352,7 +368,6 @@
                 const dd = String(now.getDate()).padStart(2, '0');
                 const treePrefix = activeTreeIds.length > 0 ? activeTreeIds[0] : 'Tree';
                 
-                // กำหนดชื่อไฟล์ใหม่ตามตำแหน่งที่กดเลือก เช่น A1-2026-09-28.jpg
                 const fileName = `${treePrefix}-${yyyy}-${mm}-${dd}.jpg`;
 
                 const response = await fetch(GAS_WEB_APP_URL, {
