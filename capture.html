@@ -75,7 +75,8 @@
     </div>
 
     <script>
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx4L0jtcCfYHPIVMQdP-YF1XCTnu6iXG2IsO-11Id5Wdt170mN8GzWdzcD2pE1BVajt/exec';
+        // อัปเดต Web App URL ใหม่ล่าสุดเรียบร้อยแล้ว
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwTHaXrCiCMqkZTroPWkS4F4XsO-0WViPKSDbrS8TAMiHi9LTLm5dNUpmL3lcBFIteI/exec';
 
         const rows = ['M', 'L', 'K', 'J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'];
         const cols = [6, 5, 4, 3, 2, 1];
@@ -161,7 +162,6 @@
                         btn.className = 'w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-600 hover:bg-amber-500 border border-amber-400 flex items-center justify-center text-xs sm:text-sm shadow-lg active:scale-95';
                         btn.innerHTML = '🏠';
                         btn.title = 'บ้าน (M1)';
-                        // แก้ไขเฉพาะส่วนนี้เพื่อให้กดแล้วลิงก์ไปที่ capture.html
                         btn.onclick = () => { window.location.href = 'capture.html'; };
                     }
 
@@ -294,7 +294,6 @@
             cameraInput.click();
         }
 
-        // ฟังก์ชันช่วยย่อขนาดรูปภาพ (Image Compression) ป้องกันไฟล์ใหญ่เกินไปใน Google Chrome
         function compressImage(file, maxWidth = 1280, maxHeight = 1280, quality = 0.8) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -345,7 +344,6 @@
             `;
 
             try {
-                // บีบอัดรูปภาพก่อนส่ง เพื่อให้ส่งผ่าน Google Chrome และ Google Apps Script ได้ฉลุย
                 const base64Image = await compressImage(file);
                 
                 const now = new Date();
@@ -494,4 +492,3 @@
     </script>
 </body>
 </html>
-    
